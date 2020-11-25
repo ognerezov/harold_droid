@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">HaraldDroid</string>
+    <string name="name_hint">Введите имя</string>
+    <string name="sensor_disabled">Bluetooth отключен</string>
+    <string name="collecting_data">... идет сбор даных</string>
+
+    <string name="bluetooth_off">Функция Bluetooth отключена</string>
+    <string name="bluetooth_disabled">Bluetooth не доступен</string>
+    <string name="bluetooth_pending">Ожидаем подключения Bluetooth</string>
+    <string name="bluetooth_scanning">Идет поиск устройств</string>
+    <string name="bluetooth_connected">Датчик подключен</string>
+</resources>
