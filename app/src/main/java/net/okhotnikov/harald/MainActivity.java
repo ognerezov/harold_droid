@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 
 import net.okhotnikov.harald.model.BluetoothState;
 import net.okhotnikov.harald.protocols.BluetoothStateListener;
+import net.okhotnikov.harald.service.AsyncService;
 import net.okhotnikov.harald.service.BluetoothService;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, BluetoothStateListener {
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button bluetoothTextButton;
     TextView bpmText, stressIndexText;
     BluetoothService bluetoothService;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         bluetoothService = new BluetoothService(this);
 
+        AsyncService.instance.setHandler(handler);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bluetoothService.stop();
     }
 
     @Override
@@ -75,8 +86,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         super.onActivityResult(requestCode, resultCode, data);
-
-
 
     }
 
