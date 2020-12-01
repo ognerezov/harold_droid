@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,7 +18,7 @@ import android.widget.TextView;
 import net.okhotnikov.harald.model.BluetoothState;
 import net.okhotnikov.harald.protocols.BluetoothStateListener;
 import net.okhotnikov.harald.service.AsyncService;
-import net.okhotnikov.harald.service.BluetoothService;
+import net.okhotnikov.harald.service.bluetooth.BluetoothService;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, BluetoothStateListener {
 
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStateChanged(BluetoothState state) {
-        bluetoothButton.setImageDrawable(
+        bluetoothButton.setBackground(
                 ContextCompat.getDrawable(this, state.getImage()));
         bluetoothTextButton.setText(getResources().getText(state.getString()));
         bluetoothTextButton.setBackgroundColor(ContextCompat.getColor(this,state.getColor()));
@@ -93,5 +92,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void enableBluetooth() {
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    public void onBpm(int bpm) {
+        bpmText.setText(String.valueOf(bpm));
     }
 }
