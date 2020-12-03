@@ -16,9 +16,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import net.okhotnikov.harald.model.BluetoothState;
+import net.okhotnikov.harald.model.processing.HartData;
 import net.okhotnikov.harald.protocols.BluetoothStateListener;
 import net.okhotnikov.harald.service.AsyncService;
+import net.okhotnikov.harald.service.ProcessingService;
 import net.okhotnikov.harald.service.bluetooth.BluetoothService;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, BluetoothStateListener {
 
@@ -29,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView bpmText, stressIndexText;
     BluetoothService bluetoothService;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private NumberFormat formatter = new DecimalFormat("#0.00");
+    private ProcessingService processingService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +62,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nameEdit.setText("Anonymous");
 
         bluetoothService = new BluetoothService(this);
+        processingService = new ProcessingService(this,30);
 
         AsyncService.instance.setHandler(handler);
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         bluetoothService.stop();
+        processingService.stop();
     }
 
     @Override
@@ -97,5 +111,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onBpm(int bpm) {
         bpmText.setText(String.valueOf(bpm));
+    }
+
+    @Override
+    public void onRR(HartData data) {
+
+    }
+
+    @Override
+    public void onRR(List<HartData> list) {
+        processingService.add(list);
+    }
+
+    @Override
+    public void onStressIndex(double bi) {
+        stressIndexText.setText(formatter.format(bi));
     }
 }

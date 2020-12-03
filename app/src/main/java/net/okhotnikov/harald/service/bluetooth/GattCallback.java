@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
 import net.okhotnikov.harald.model.BluetoothState;
+import net.okhotnikov.harald.model.processing.HartData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,19 +96,18 @@ public class GattCallback extends BluetoothGattCallback {
         int energy = -1;
         int offset = 1;
         int rr_count = 0;
-        List<Integer> rrValues = new ArrayList<>();
         if ((flag & 0x01) != 0) {
             format = BluetoothGattCharacteristic.FORMAT_UINT16;
-            Log.d("bluetooth data","Heart rate format UINT16.");
+          //  Log.d("bluetooth data","Heart rate format UINT16.");
             offset = 3;
         } else {
             format = BluetoothGattCharacteristic.FORMAT_UINT8;
-            Log.d("bluetooth data","Heart rate format UINT8.");
+          //  Log.d("bluetooth data","Heart rate format UINT8.");
             offset = 2;
         }
         final int heartRate = characteristic.getIntValue(format, 1);
         owner.getStateListener().onBpm(heartRate);
-        Log.d("bluetooth data","Received heart rate: " + heartRate);
+//        Log.d("bluetooth data","Received heart rate: " + heartRate);
 //                if ((flag & 0x08) != 0) {
 //                    // calories present
 //                    energy = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
@@ -116,11 +116,14 @@ public class GattCallback extends BluetoothGattCallback {
 //                }
         if ((flag & 0x10) != 0){
             rr_count = ((characteristic.getValue()).length - offset) / 2;
+
+            List<HartData> list = new ArrayList<>();
             for (int i = 0; i < rr_count; i++){
-                rrValues.add(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset));
+                double rr = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 1000.0;
                 offset += 2;
-                Log.d("bluetooth data","Received RR: " + rrValues.get(i));
+                list.add(new HartData(rr,heartRate));
             }
+            owner.getStateListener().onRR(list);
         }
     }
 

@@ -1,7 +1,6 @@
 package net.okhotnikov.harald.service;
 
 import android.os.Handler;
-import android.os.ParcelUuid;
 
 import net.okhotnikov.harald.protocols.Action;
 import net.okhotnikov.harald.protocols.Job;
@@ -13,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class AsyncService {
     public static final AsyncService instance = new AsyncService();
     private final ThreadPoolExecutor pool=new ThreadPoolExecutor(5,15,
-            5, TimeUnit.MINUTES,new ArrayBlockingQueue<Runnable>(150));
+            5, TimeUnit.MINUTES,new ArrayBlockingQueue<>(150));
 
     private Handler handler;
 
@@ -27,8 +26,8 @@ public class AsyncService {
 
     public <T,E> void perform(Job<T,E> job, Action<T> onSuccess, Action <E> onError){
         pool.execute(()-> job.action(
-                result -> handler.post(()-> onSuccess.perform(result)),
-                error -> handler.post(()-> onError.perform(error))
+                result -> handler.post(()-> onSuccess.action(result)),
+                error -> handler.post(()-> onError.action(error))
         ));
     }
 }

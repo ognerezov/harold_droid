@@ -3,10 +3,6 @@ package net.okhotnikov.harald.service.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -98,6 +94,50 @@ public class BluetoothService extends ScanCallback {
         sensor = bluetoothAdapter.getRemoteDevice(address);
 
         gatt = sensor.connectGatt(activity, true, new GattCallback(this));
+    }
+
+    public BluetoothState getState() {
+        return state;
+    }
+
+    public void setState(BluetoothState state) {
+        stateListener.onStateChanged(state);
+        this.state = state;
+    }
+
+    public void resetAdapter() {
+        bluetoothAdapter = bluetoothManager.getAdapter();
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+            activity.enableBluetooth();
+            return;
+        }
+        System.out.println("****");
+        scan();
+    }
+
+    @Override
+    public void onScanResult(int callbackType, ScanResult result) {
+        super.onScanResult(callbackType, result);
+        if (result.getDevice() == null || result.getDevice().getUuids() == null){
+            return;
+        }
+        for(ParcelUuid parcelUuid: result.getDevice().getUuids()){
+            if(!uuids.contains(parcelUuid.getUuid())){
+                System.out.println(parcelUuid.getUuid());
+                uuids.add(parcelUuid.getUuid());
+            }
+        }
+    }
+
+    public void stop() {
+        gatt.close();
+        gatt = null;
+
+    }
+}
+/*
+  le scanner not in use for now
+ */
 //        for (BluetoothDevice device: bluetoothAdapter.getBondedDevices()){
 //            String name = device.getName();
 //
@@ -157,44 +197,3 @@ public class BluetoothService extends ScanCallback {
 //        );
 
 //        bluetoothLeScanner.startScan(this);
-    }
-
-    public BluetoothState getState() {
-        return state;
-    }
-
-    public void setState(BluetoothState state) {
-        stateListener.onStateChanged(state);
-        this.state = state;
-    }
-
-    public void resetAdapter() {
-        bluetoothAdapter = bluetoothManager.getAdapter();
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            activity.enableBluetooth();
-            return;
-        }
-        System.out.println("****");
-        scan();
-    }
-
-    @Override
-    public void onScanResult(int callbackType, ScanResult result) {
-        super.onScanResult(callbackType, result);
-        if (result.getDevice() == null || result.getDevice().getUuids() == null){
-            return;
-        }
-        for(ParcelUuid parcelUuid: result.getDevice().getUuids()){
-            if(!uuids.contains(parcelUuid.getUuid())){
-                System.out.println(parcelUuid.getUuid());
-                uuids.add(parcelUuid.getUuid());
-            }
-        }
-    }
-
-    public void stop() {
-        gatt.close();
-        gatt = null;
-
-    }
-}
