@@ -80,7 +80,7 @@ public class BluetoothService extends ScanCallback {
             return;
         }
 
-        System.out.println("!!!!");
+//        System.out.println("!!!!");
         scan();
     }
 
@@ -111,7 +111,7 @@ public class BluetoothService extends ScanCallback {
             activity.enableBluetooth();
             return;
         }
-        System.out.println("****");
+       // System.out.println("****");
         scan();
     }
 
@@ -123,7 +123,7 @@ public class BluetoothService extends ScanCallback {
         }
         for(ParcelUuid parcelUuid: result.getDevice().getUuids()){
             if(!uuids.contains(parcelUuid.getUuid())){
-                System.out.println(parcelUuid.getUuid());
+            //    System.out.println(parcelUuid.getUuid());
                 uuids.add(parcelUuid.getUuid());
             }
         }

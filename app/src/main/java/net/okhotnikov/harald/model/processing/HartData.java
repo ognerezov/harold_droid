@@ -1,28 +1,31 @@
 package net.okhotnikov.harald.model.processing;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class HartData {
+    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
     public static final HartData NaN = new HartData(Double.NaN,0);
-    public Timestamp time;
+    public Date date;
     public double rr;
     public int bpm;
 
     public HartData(double rr, int bpm) {
         this.rr = rr;
         this.bpm = bpm;
-        Date date = new Date();
-        this.time = new Timestamp(date.getTime());
+        this.date = new Date();
     }
 
+    @JsonIgnore
     public boolean isNan(){
         return Double.isNaN(rr);
     }
 
-    public HartData(Timestamp time, double rr, int bpm) {
-        this.time = time;
+    public HartData(Date time, double rr, int bpm) {
+        this.date = time;
         this.rr = rr;
         this.bpm = bpm;
     }
@@ -30,12 +33,18 @@ public class HartData {
     public HartData() {
     }
 
-    public Timestamp getTime() {
-        return time;
+    public String getTime(){
+        return sdf.format(date);
     }
 
-    public void setTime(Timestamp time) {
-        this.time = time;
+    @JsonIgnore
+    public Date getDate() {
+        return date;
+    }
+
+    @JsonIgnore
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public double getRr() {
@@ -57,7 +66,7 @@ public class HartData {
     @Override
     public String toString() {
         return "HartData{" +
-                "time=" + time +
+                "time=" + getTime() +
                 ", rr=" + rr +
                 ", bpm=" + bpm +
                 '}';

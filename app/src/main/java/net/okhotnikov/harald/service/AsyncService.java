@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class AsyncService {
     public static final AsyncService instance = new AsyncService();
     private final ThreadPoolExecutor pool=new ThreadPoolExecutor(5,15,
-            5, TimeUnit.MINUTES,new ArrayBlockingQueue<>(150));
+            5, TimeUnit.MINUTES,new ArrayBlockingQueue<>(1000));
 
     private Handler handler;
 
@@ -29,5 +29,16 @@ public class AsyncService {
                 result -> handler.post(()-> onSuccess.action(result)),
                 error -> handler.post(()-> onError.action(error))
         ));
+    }
+
+    public <T,E> void execute(Job<T,E> job, Action<T> onSuccess, Action <E> onError){
+        pool.execute(()-> job.action(
+                onSuccess,
+                onError
+        ));
+    }
+
+    public void execute(Runnable r){
+        pool.execute(r);
     }
 }

@@ -10,7 +10,9 @@ import android.util.Log;
 import net.okhotnikov.harald.model.BluetoothState;
 import net.okhotnikov.harald.model.processing.HartData;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
@@ -85,8 +87,8 @@ public class GattCallback extends BluetoothGattCallback {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicChanged(gatt, characteristic);
-        System.out.println(characteristic.getUuid());
-        System.out.println(characteristic.getValue().length);
+//        System.out.println(characteristic.getUuid());
+//        System.out.println(characteristic.getValue().length);
         parseData(characteristic);
     }
 
@@ -118,10 +120,16 @@ public class GattCallback extends BluetoothGattCallback {
             rr_count = ((characteristic.getValue()).length - offset) / 2;
 
             List<HartData> list = new ArrayList<>();
+            Date date = new Date();
+
             for (int i = 0; i < rr_count; i++){
                 double rr = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) / 1000.0;
                 offset += 2;
-                list.add(new HartData(rr,heartRate));
+                if (i ==0)
+                    list.add(new HartData(date,rr,heartRate));
+                else{
+                    list.add(new HartData(new Date(date.getTime() + 100*i),rr,heartRate));
+                }
             }
             owner.getStateListener().onRR(list);
         }

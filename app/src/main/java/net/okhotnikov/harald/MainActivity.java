@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_ENABLE_BT){
-            System.out.println(resultCode);
+           // System.out.println(resultCode);
             bluetoothService.resetAdapter();
         }
 
@@ -126,5 +126,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStressIndex(double bi) {
         stressIndexText.setText(formatter.format(bi));
+    }
+
+    public String getPerson(){
+        return nameEdit.getText().toString();
     }
 }
