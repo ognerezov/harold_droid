@@ -6,7 +6,6 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import net.okhotnikov.harald.MainActivity;
-import net.okhotnikov.harald.protocols.StressNotificator;
 
 public class VibrationService  {
 

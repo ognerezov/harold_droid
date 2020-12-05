@@ -3,11 +3,10 @@ package net.okhotnikov.harald.model.processing;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class HartData {
-    public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
     public static final HartData NaN = new HartData(Double.NaN,0);
     public Date date;
     public double rr;
@@ -34,7 +33,7 @@ public class HartData {
     }
 
     public String getTime(){
-        return sdf.format(date);
+        return SIMPLE_DATE_FORMAT.format(date);
     }
 
     @JsonIgnore

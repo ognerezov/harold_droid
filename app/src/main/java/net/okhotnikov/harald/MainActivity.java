@@ -6,16 +6,21 @@ import androidx.core.content.ContextCompat;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import net.okhotnikov.harald.model.BluetoothState;
@@ -29,6 +34,7 @@ import net.okhotnikov.harald.service.LocalPersistence;
 import net.okhotnikov.harald.service.ProcessingService;
 import net.okhotnikov.harald.service.VibrationService;
 import net.okhotnikov.harald.service.bluetooth.BluetoothService;
+import net.okhotnikov.harald.view.ReportController;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -42,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button bluetoothTextButton;
     TextView bpmText, stressIndexText;
     BluetoothService bluetoothService;
+    LinearLayout reportProgressBar;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private NumberFormat formatter = new DecimalFormat("#0.00");
     private ProcessingService processingService;
@@ -49,11 +56,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private StressAnalyzer stressAnalyzer;
     private LocalPersistence localPersistence;
     private User user;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "Harold:Listening for your heart");
 
         localPersistence = new LocalPersistence(this);
         user = localPersistence.load();
@@ -67,11 +82,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         iAmInStressButton = findViewById(R.id.im_in_stress);
         bpmText = findViewById(R.id.bpm_text);
         stressIndexText = findViewById(R.id.si_text);
+        reportProgressBar = findViewById(R.id.report_progress_bar);
+
+        ReportController reportController = new ReportController(iAmOkButton,iAmInStressButton,reportProgressBar,this);
 
         bluetoothButton.setOnClickListener(this);
         bluetoothTextButton.setOnClickListener(this);
-        iAmOkButton.setOnClickListener(this);
-        iAmInStressButton.setOnClickListener(this);
+        iAmOkButton.setOnClickListener(reportController);
+        iAmInStressButton.setOnClickListener(reportController);
 
         nameEdit.setText(user.person);
         nameEdit.addTextChangedListener(this);
@@ -80,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         processingService = new ProcessingService(this,30);
         vibrationService = new VibrationService(this);
         stressAnalyzer = new StressAnalyzer(this);
+
 
         AsyncService.instance.setHandler(handler);
     }
@@ -102,6 +121,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStateChanged(BluetoothState state) {
+        if(state == BluetoothState.connected){
+            wakeLock.acquire();
+        } else {
+            try {
+                if(wakeLock.isHeld())
+                    wakeLock.release();
+            }catch (Exception ignored){
+
+            }
+        }
         bluetoothButton.setBackground(
                 ContextCompat.getDrawable(this, state.getImage()));
         bluetoothTextButton.setText(getResources().getText(state.getString()));
